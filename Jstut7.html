@@ -1,0 +1,165 @@
+ 
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">        
+        <meta name="viewport" content="width = device-width, initial-scale = 1">
+        <title>JavaScript Paint App</title>
+        <link rel="stylesheet" type="text/css" href="mainstyle.css">
+        <script src="jscolor.js"></script>
+        <script src="jstut7-2.js"></script>
+        
+    </head>
+    <body>
+        <div class="wrapper">
+ 
+            <div class="toolbar">
+                <a class="selected" href="#" id="open" onclick="OpenImage()"><img src="open-icon.png"></a>
+                <a href="#" id="save" onclick="SaveImage()"><img src="save-icon.png"></a>
+                <a href="#" id="brush" onclick="ChangeTool('brush')"><img src="brush-icon.png"></a>
+                <a href="#" id="line" onclick="ChangeTool('line')"><img src="line-icon.png"></a>
+                <a href="#" id="rectangle" onclick="ChangeTool('rectangle')"><img src="rectangle-icon.png"></a>
+                <a href="#" id="circle" onclick="ChangeTool('circle')"><img src="circle-icon.png"></a>
+                <a href="#" id="ellipse" onclick="ChangeTool('ellipse')"><img src="ellipse-icon.png"></a>
+                <a href="#" id="polygon" onclick="ChangeTool('polygon')"><img src="polygon-icon.png"></a>
+            </div><br>
+<canvas id="my-canvas" width="600" height="600"></canvas>
+            <div id="img-data-div">
+                <a href="#" id="img-file" download="image.png">download image</a>
+            </div>
+ 
+        </div>
+    </body>
+</html>
+ 
+mainstyle.css
+ 
+.wrapper {
+    max-width: 900px;
+    margin: auto;
+    font-family: "Arial";
+}
+ 
+.toolbar{
+    width: 100%;
+    background-color: #444444;
+    overflow: auto;
+}
+ 
+.toolbar a {
+    float: left;
+    width: 11%;
+    text-align: center;
+    padding: 6px 5px;
+    transition: all 0.5s ease;
+    color: white;
+}
+ 
+/* Change color on hover */
+.toolbar a:hover {
+    background-color: #000;
+  }
+ 
+/* Change color on selected icon */
+.selected {
+    background-color: #000; 
+}
+ 
+#my-canvas{
+    width: 100%;
+    border: 3px solid #000000;
+}
+ 
+#img-data-div{
+    width: 100%;
+    max-width: 900px;
+    height: 200px;
+}
+ 
+/* Resize image to container */
+.toolbar a img{
+    max-width:100%;
+    height:auto;
+}
+ 
+JSTUT7.JS
+ 
+// JavaScript Paint App JavaScript Canvas API
+ 
+// Reference to the canvas element
+let canvas;
+// Context provides functions used for drawing and 
+// working with Canvas
+let ctx;
+// Stores previously drawn image data to restore after
+// new drawings are added
+let savedImageData;
+// Stores whether I'm currently dragging the mouse
+let dragging = false;
+let strokeColor = 'black';
+let fillColor = 'black';
+let line_Width = 2;
+let polygonSides = 6;
+// Tool currently using
+let currentTool = 'brush';
+let canvasWidth = 600;
+let canvasHeight = 600;
+ 
+// Stores size data used to create rubber band shapes
+// that will redraw as the user moves the mouse
+class ShapeBoundingBox{
+    constructor(left, top, width, height) {
+        this.left = left;
+        this.top = top;
+        this.width = width;
+        this.height = height;
+    }
+}
+ 
+// Holds x & y position where clicked
+class MouseDownPos{
+    constructor(x,y) {
+        this.x = x,
+        this.y = y;
+    }
+}
+ 
+// Holds x & y location of the mouse
+class Location{
+    constructor(x,y) {
+        this.x = x,
+        this.y = y;
+    }
+}
+ 
+// Holds x & y polygon point values
+class PolygonPoint{
+    constructor(x,y) {
+        this.x = x,
+        this.y = y;
+    }
+}
+// Stores top left x & y and size of rubber band box 
+let shapeBoundingBox = new ShapeBoundingBox(0,0,0,0);
+// Holds x & y position where clicked
+let mousedown = new MouseDownPos(0,0);
+// Holds x & y location of the mouse
+let loc = new Location(0,0);
+ 
+// Call for our function to execute when page is loaded
+document.addEventListener('DOMContentLoaded', setupCanvas);
+ 
+function setupCanvas(){
+    // Get reference to canvas element
+    canvas = document.getElementById('my-canvas');
+    // Get methods for manipulating the canvas
+    ctx = canvas.getContext('2d');
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = line_Width;
+    // Execute ReactToMouseDown when the mouse is clicked
+    canvas.addEventListener("mousedown", ReactToMouseDown);
+    // Execute ReactToMouseMove when the mouse is clicked
+    canvas.addEventListener("mousemove", ReactToMouseMove);
+    // Execute ReactToMouseUp when the mouse is clicked
+    canvas.addEventListener("mouseup", ReactToMouseUp);
+}
